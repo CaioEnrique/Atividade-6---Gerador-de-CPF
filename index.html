@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de CPF Válido</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #555;
+            margin: 20px 0 15px;
+            font-size: 1.3em;
+        }
+
+        .info-section {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-section h3 {
+            color: #444;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-section ul, .info-section ol {
+            margin-left: 20px;
+            color: #666;
+        }
+
+        .info-section li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .generator-box {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .cpf-display {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            border: 2px dashed #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .validation-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            display: none;
+        }
+
+        .validation-info.show {
+            display: block;
+        }
+
+        .criteria-box {
+            background: #fff3e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .criteria-box p {
+            color: #555;
+            margin: 5px 0;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Gerador de CPF Válido</h1>
+        
+        <div class="info-section">
+            <h3>📋 Critérios para Validação do CPF:</h3>
+            <ul>
+                <li><strong>Estrutura:</strong> 11 dígitos numéricos (formato: XXX.XXX.XXX-XX)</li>
+                <li><strong>Dígitos verificadores:</strong> Dois últimos dígitos são calculados baseados nos 9 primeiros</li>
+                <li><strong>Não pode ter todos os dígitos iguais</strong> (ex: 111.111.111-11)</li>
+                <li><strong>Cálculo do 1º dígito:</strong> Multiplica-se os 9 primeiros dígitos por pesos de 10 a 2, soma, divide por 11, e aplica regra específica</li>
+                <li><strong>Cálculo do 2º dígito:</strong> Mesmo processo incluindo o 1º dígito e pesos de 11 a 2</li>
+            </ul>
+        </div>
+
+        <div class="generator-box">
+            <div class="cpf-display" id="cpfDisplay">000.000.000-00</div>
+            
+            <button class="btn-generate" id="generateBtn">
+                🎲 Gerar CPF Válido
+            </button>
+
+            <div class="validation-info" id="validationInfo">
+                ✅ CPF gerado com sucesso! Todos os dígitos verificadores estão corretos.
+            </div>
+
+            <div class="criteria-box">
+                <h3>🔍 Como testar:</h3>
+                <p>1. Clique em "Gerar CPF Válido" para criar um novo CPF</p>
+                <p>2. Copie o CPF gerado (ex: 123.456.789-09)</p>
+                <p>3. Acesse um site validador de CPF (como geradorcpf.com ou 4devs.com.br/gerador_cpf)</p>
+                <p>4. Cole o CPF no validador e verifique se é válido</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            ⚡ Este gerador cria CPFs válidos seguindo todas as regras oficiais
+        </div>
+    </div>
+
+    <script>
+        class GeradorCPF {
+            constructor() {
+                this.cpfDisplay = document.getElementById('cpfDisplay');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.validationInfo = document.getElementById('validationInfo');
+                
+                this.generateBtn.addEventListener('click', () => this.gerarNovoCPF());
+            }
+
+            // Gerar números aleatórios entre min e max
+            randomizar(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            // Calcular dígito verificador
+            calcularDigito(cpfParcial, pesoInicial) {
+                let soma = 0;
+                for (let i = 0; i < cpfParcial.length; i++) {
+                    soma += parseInt(cpfParcial.charAt(i)) * (pesoInicial - i);
+                }
+                
+                const resto = soma % 11;
+                return resto < 2 ? 0 : 11 - resto;
+            }
+
+            // Gerar CPF válido
+            gerarCPF() {
+                // Gerar 9 primeiros dígitos
+                let cpfBase = '';
+                for (let i = 0; i < 9; i++) {
+                    cpfBase += this.randomizar(0, 9).toString();
+                }
+
+                // Verificar se não são todos iguais
+                if (new Set(cpfBase).size === 1) {
+                    return this.gerarCPF(); // Recursão para gerar novo se todos iguais
+                }
+
+                // Calcular primeiro dígito verificador
+                const primeiroDigito = this.calcularDigito(cpfBase, 10);
+                
+                // Calcular segundo dígito verificador (incluindo o primeiro)
+                const segundoDigito = this.calcularDigito(cpfBase + primeiroDigito, 11);
+
+                // Formatar CPF
+                const cpfCompleto = cpfBase + primeiroDigito + segundoDigito;
+                return this.formatarCPF(cpfCompleto);
+            }
+
+            // Formatar CPF no padrão XXX.XXX.XXX-XX
+            formatarCPF(cpf) {
+                return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+
+            // Validar o CPF gerado (para garantir)
+            validarCPF(cpfFormatado) {
+                const cpf = cpfFormatado.replace(/[^\d]/g, '');
+                
+                if (cpf.length !== 11) return false;
+                
+                // Verificar se todos os dígitos são iguais
+                if (/^(\d)\1+$/.test(cpf)) return false;
+                
+                // Validar primeiro dígito
+                const primeiroDigito = this.calcularDigito(cpf.substring(0, 9), 10);
+                if (primeiroDigito !== parseInt(cpf.charAt(9))) return false;
+                
+                // Validar segundo dígito
+                const segundoDigito = this.calcularDigito(cpf.substring(0, 10), 11);
+                if (segundoDigito !== parseInt(cpf.charAt(10))) return false;
+                
+                return true;
+            }
+
+            // Gerar e exibir novo CPF
+            gerarNovoCPF() {
+                const novoCPF = this.gerarCPF();
+                this.cpfDisplay.textContent = novoCPF;
+                
+                // Validar o CPF gerado
+                if (this.validarCPF(novoCPF)) {
+                    this.validationInfo.classList.add('show');
+                    setTimeout(() => {
+                        this.validationInfo.classList.remove('show');
+                    }, 3000);
+                }
+                
+                // Adicionar efeito de animação
+                this.cpfDisplay.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    this.cpfDisplay.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+
+        // Inicializar o gerador quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new GeradorCPF();
+        });
+    </script>
+</body>
+</html>
